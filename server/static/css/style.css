@@ -1,0 +1,11 @@
+h1 {
+  color: rgb(97, 38, 153);
+}
+
+ul.future-features {
+  list-style-type: none;
+}
+
+ul.future-features li.checked {
+  text-decoration: line-through;
+}

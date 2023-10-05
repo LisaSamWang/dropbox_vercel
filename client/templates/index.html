@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="microphone 'self'" />
+    <title>App title tbd</title>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  </head>
+  <body>
+    <h1>Audio-to-Agreement (change title later)</h1>
+
+    <!-- Step 1: user uploads an audio file -->
+    <form method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".mp3, .wav, .ogg" hidden />
+      <input type="submit" value="Transcribe" hidden />
+    </form>
+
+    <!-- Step 2: display transcribed text -->
+    <button id="startSpeechRecognition">Start Speech</button>
+    <button id="eraseTranscription">Erase</button>
+    {% if transcript == "" %}
+    <div id="transcription">say something</div>
+    {% endif %} {% if transcript != "" %}
+    <div id="speechTranscriptContainer">
+      <div id="transcription">
+        <h2>Transcribed Text:</h2>
+        <p>{{ transcript }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- display the summary -->
+    <div id="summaryContainer">
+      <h2>Summary:</h2>
+      <div id="summary"></div>
+    </div>
+
+    <!-- Step 3: generate agreements -->
+    <h2>Generated Agreements:</h2>
+    <p>Note: maybe generate 3 agreement templates to choose from (?)</p>
+    <ul>
+      <li>Agreement 1</li>
+      <li>Agreement 2</li>
+      <li>Agreement 3</li>
+      <!-- additional agreements will be listed here -->
+    </ul>
+
+    <!-- Step 4: user feedback and modification using audio file upload -->
+    <h2>Review and Modify Agreements:</h2>
+    <form action="/modify" method="POST" enctype="multipart/form-data">
+      <input type="file" name="audio_feedback" accept=".mp3, .wav, .ogg" />
+      <input type="submit" value="Upload Audio Feedback" />
+    </form>
+
+    <!-- Step 5: ai suggestions -->
+    <h2>AI Suggestions:</h2>
+    <p>AI-generated suggestions based on user feedback will display here</p>
+
+    <!-- Step 6: finalise & download agreements -->
+    <a href="/download">Download Customized Agreements</a>
+
+    <!-- future features - will leave it here for now and check off later-->
+    <h2>Future Features:</h2>
+    <ul class="future-features">
+      <li>Live translation</li>
+      <li>Read agreements aloud</li>
+      <li>Auto-sign certain documents</li>
+      <li>Remove signatures</li>
+      <li>Manage document collections</li>
+    </ul>
+
+    <!--responsible for live speech to text with Web Speech API -->
+    <script>
+      $(document).ready(function () {
+        const $transcription = $("#transcription");
+        const $summary = $("#summary");
+        let isSpeechDetected = false; // track speech detection
+
+        function appendTranscript(transcript) {
+          const currentTime = new Date().toLocaleTimeString();
+          const newSpeech = `<p><strong>${currentTime}:</strong><span style="color: blue;">${transcript}</span></p>`;
+          $transcription.append(newSpeech);
+          isSpeechDetected = true;
+        }
+
+        function startSummarization() {
+          if (!isSpeechDetected) {
+            // if no speech detected within 1 min, start summarization
+            const transcript = $transcription.text(); // get all transcript
+            if (transcript) {
+              // send transcript for summarization
+              fetch("/summarize", {
+                method: "POST",
+                body: JSON.stringify({ transcript: transcript }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  // display #summary
+                  const summary = data.summary;
+                  $summary.html(`<p>${summary}</p>`);
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
+            }
+          }
+          isSpeechDetected = false;
+        }
+
+        $("#startSpeechRecognition").click(function () {
+          const recognition = new webkitSpeechRecognition();
+          recognition.continuous = true;
+
+          // set a timeout for summarization after 1 min (i have it as 6 seconds for now to test)
+          const summarizationTimeout = setTimeout(startSummarization, 6000);
+
+          recognition.onresult = function (event) {
+            const transcript =
+              event.results[event.results.length - 1][0].transcript;
+            appendTranscript(transcript);
+            clearTimeout(summarizationTimeout); // reset timeout
+          };
+
+          recognition.onstart = function () {
+            console.log("start");
+          };
+
+          recognition.onend = function () {
+            console.log("end");
+          };
+
+          recognition.start();
+        });
+
+        $("#eraseTranscription").click(function () {
+          $transcription.empty();
+          $summary.empty();
+          isSpeechDetected = false;
+        });
+      });
+    </script>
+  </body>
+</html>
