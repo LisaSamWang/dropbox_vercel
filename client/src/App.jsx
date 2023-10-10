@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import HelloSign from 'hellosign-embedded';
+import React, { useEffect, useState } from 'react';
 
 function App() {
   const [transcript, setTranscript] = useState('');
@@ -165,8 +165,24 @@ function App() {
     );
   };
 
+  const client = new HelloSign();
+
+  const openSign = () => {
+    fetch("http://localhost:8080/api/dropbox", {
+      method: 'GET',
+      mode: 'no-cors', // Set the mode option to 'no-cors'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+  }
+
   return (
     <div className="App">
+
       <h1>Audio-to-Agreement (change title later)</h1>
 
       {/* Step 1: user uploads an audio file */}
@@ -225,7 +241,9 @@ function App() {
       <p>AI-generated suggestions based on user feedback will display here</p>
 
       {/* Step 7: finalise & download agreements */}
-      <a href="/download">Download Customized Agreements</a>
+      <div>
+        <a href="/download">Download Customized Agreements</a> <button onClick={openSign}>Click Here To Sign</button>
+      </div>
 
       {/* Future features - will leave it here for now and check off later */}
       <h2>Future Features:</h2>

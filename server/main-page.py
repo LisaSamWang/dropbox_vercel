@@ -7,7 +7,6 @@ from pprint import pprint
 
 import openai
 from dotenv import load_dotenv
-
 from dropbox_sign import ApiClient, ApiException, Configuration, apis, models
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -15,6 +14,7 @@ from flask_cors import CORS
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
+
 
 # OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -120,10 +120,13 @@ def embeddedSign(signid):
         try:
             response = embedded_api.embedded_sign_url(signature_id)
             pprint(response)
+            print('CHECK RES', response["embedded"]["sign_url"])
+            return response["embedded"]["sign_url"]
+
         except ApiException as e:
             print("Exception when calling Dropbox Sign API: %s\n" % e)
                 
-@app.route("/api/dropbox", methods=["POST"])
+@app.route("/api/dropbox", methods=["GET", "POST"])
 #embedded
 def dropbox():
     try:
@@ -137,11 +140,11 @@ def dropbox():
                 order=0,
             )
 
-            signer_2 = models.SubSignatureRequestSigner(
-                email_address="0509biancafu@gmail.com",
-                name="Bianca",
-                order=1,
-            )
+            # signer_2 = models.SubSignatureRequestSigner(
+            #     email_address="0509biancafu@gmail.com",
+            #     name="Bianca",
+            #     order=1,
+            # )
 
             signing_options = models.SubSigningOptions(
                 draw=True,
@@ -156,7 +159,7 @@ def dropbox():
                 title="NDA with Acme Co.",
                 subject="The NDA we talked about",
                 message="Please sign this NDA and then we can discuss more. Let me know if you have any questions.",
-                signers=[signer_1, signer_2],
+                signers=[signer_1],
                 cc_email_addresses=["thy_doraemon@yahoo.com"],
                 files=[open("legal_document.pdf", "rb")],
                 signing_options=signing_options,
@@ -166,9 +169,18 @@ def dropbox():
             try:
                 response = signature_request_api.signature_request_create_embedded(data)
                 pprint(response)
+                #calling embeddedSign
+                print(response)
+                for object in response["signature_request"]["signatures"]:
+                    print("embedded signature id", object["signature_id"])
+                    url = embeddedSign(object["signature_id"])
+
+                return jsonify({"sign_url": url})
+                
+
+
             except ApiException as e:
                 print("Exception when calling Dropbox Sign API: %s\n" % e)
-
 
 
     except Exception as e:
