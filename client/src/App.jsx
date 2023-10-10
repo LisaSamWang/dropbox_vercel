@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import HelloSign from 'hellosign-embedded';
 
 function App() {
   const [transcript, setTranscript] = useState('');
@@ -68,7 +69,7 @@ function App() {
       if (transcriptData) {
         console.log('Starting summarization...');
         // fetch('http://localhost:8080/summarize', {
-          fetch('"https://dropbox-backend.onrender.com/api/summarize"', {
+        fetch('"https://dropbox-backend.onrender.com/api/summarize"', {
           method: 'POST',
           body: JSON.stringify({ transcript: transcriptData }),
           headers: {
@@ -118,7 +119,7 @@ function App() {
   useEffect(() => {
     if (isGeneratingResponses) {
       // fetch("http://localhost:8080/summarize", {
-        fetch('"https://dropbox-backend.onrender.com/api/summarize"', {
+      fetch('"https://dropbox-backend.onrender.com/api/summarize"', {
         method: 'POST',
         body: JSON.stringify({ transcript: transcript }),
         headers: {
@@ -144,9 +145,11 @@ function App() {
     }
   }, [transcript, isGeneratingResponses]);
 
-  const fetchResponses = () => {
-    setIsGeneratingResponses(true);
-  };
+
+
+  // const fetchResponses = () => {
+  //   setIsGeneratingResponses(true);
+  // };
 
   const renderGeneratedResponses = () => {
     if (generatedResponses.length === 0) {

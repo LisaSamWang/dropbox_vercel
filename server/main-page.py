@@ -3,10 +3,14 @@
 import json
 import os
 import re
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from pprint import pprint
+
 import openai
 from dotenv import load_dotenv
+
+from dropbox_sign import ApiClient, ApiException, Configuration, apis, models
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 load_dotenv()
 app = Flask(__name__)
@@ -14,6 +18,8 @@ CORS(app)
 
 # OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
 @app.route("/api/summarize", methods=["POST"])
 def summarize():
     try:
@@ -46,6 +52,129 @@ def summarize():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+#dropbox
+configuration = Configuration(
+    username = os.getenv("DROPBOX_API_KEY"),
+)
+
+
+# with ApiClient(configuration) as api_client:
+#             signature_request_api = apis.SignatureRequestApi(api_client)
+
+#             signer_1 = models.SubSignatureRequestSigner(
+#                 email_address="thydoraemon13@gmail.com",
+#                 name="Thy",
+#                 order=0,
+#             )
+
+#             signer_2 = models.SubSignatureRequestSigner(
+#                 email_address="0509biancafu@gmail.com",
+#                 name="Bianca",
+#                 order=1,
+#             )
+
+#             signing_options = models.SubSigningOptions(
+#                 draw=True,
+#                 type=True,
+#                 upload=True,
+#                 phone=True,
+#                 default_type="draw",
+#             )
+
+#             data = models.SignatureRequestCreateEmbeddedRequest(
+#                 client_id=os.getenv("CLIENT_ID"),
+#                 title="NDA with Acme Co.",
+#                 subject="The NDA we talked about",
+#                 message="Please sign this NDA and then we can discuss more. Let me know if you have any questions.",
+#                 signers=[signer_1, signer_2],
+#                 cc_email_addresses=["thy_doraemon@yahoo.com"],
+#                 files=[open("legal_document.pdf", "rb")],
+#                 signing_options=signing_options,
+#                 test_mode=True,
+#             )
+
+#             try:
+#                 response = signature_request_api.signature_request_create_embedded(data)
+#                 pprint(response)
+#             except ApiException as e:
+#                 print("Exception when calling Dropbox Sign API: %s\n" % e)
+
+# with ApiClient(configuration) as api_client:
+#     embedded_api = apis.EmbeddedApi(api_client)
+
+#     signature_id = "a2d0723f7b75d5449210d36b2656e4a0"
+
+#     try:
+#         response = embedded_api.embedded_sign_url(signature_id)
+#         pprint(response)
+#     except ApiException as e:
+#         print("Exception when calling Dropbox Sign API: %s\n" % e)
+
+#embedded sign
+def embeddedSign(signid):
+    with ApiClient(configuration) as api_client:
+        embedded_api = apis.EmbeddedApi(api_client)
+
+        signature_id = signid
+
+        try:
+            response = embedded_api.embedded_sign_url(signature_id)
+            pprint(response)
+        except ApiException as e:
+            print("Exception when calling Dropbox Sign API: %s\n" % e)
+                
+@app.route("/api/dropbox", methods=["POST"])
+#embedded
+def dropbox():
+    try:
+        #get signature id
+        with ApiClient(configuration) as api_client:
+            signature_request_api = apis.SignatureRequestApi(api_client)
+
+            signer_1 = models.SubSignatureRequestSigner(
+                email_address="thydoraemon13@gmail.com",
+                name="Thy",
+                order=0,
+            )
+
+            signer_2 = models.SubSignatureRequestSigner(
+                email_address="0509biancafu@gmail.com",
+                name="Bianca",
+                order=1,
+            )
+
+            signing_options = models.SubSigningOptions(
+                draw=True,
+                type=True,
+                upload=True,
+                phone=True,
+                default_type="draw",
+            )
+
+            data = models.SignatureRequestCreateEmbeddedRequest(
+                client_id=os.getenv("CLIENT_ID"),
+                title="NDA with Acme Co.",
+                subject="The NDA we talked about",
+                message="Please sign this NDA and then we can discuss more. Let me know if you have any questions.",
+                signers=[signer_1, signer_2],
+                cc_email_addresses=["thy_doraemon@yahoo.com"],
+                files=[open("legal_document.pdf", "rb")],
+                signing_options=signing_options,
+                test_mode=True,
+            )
+
+            try:
+                response = signature_request_api.signature_request_create_embedded(data)
+                pprint(response)
+            except ApiException as e:
+                print("Exception when calling Dropbox Sign API: %s\n" % e)
+
+
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 def preprocess_transcript(transcript):
     cleaned_transcript = re.sub(r'\d{2}:\d{2}:\d{2}:', '. ', transcript)
     sentences = re.split(r'(?<=[.!?])\s+', cleaned_transcript)
@@ -71,7 +200,6 @@ def generate_summary(text):
             temperature=0.7  # Adjust temperature as per your requirement
         )
 
-        
         
         summary = response['choices'][0]['message']['content'].strip()
         return summary
