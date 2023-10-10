@@ -183,8 +183,8 @@ function App() {
 
   return (
     <div className="App">
-    <div>
-      <h1 class="one">
+    <div class="one">
+      <h1 >
         Audio-to-Agreemen
         <span>by hacakthon group</span>
       </h1>
@@ -198,18 +198,22 @@ function App() {
       </form>
 
       {/* Step 2: display transcribed text */}
+      <div class= 'section-header'>Audio Record Agreement Details</div>
+      <div class= 'instructions'>real time audio input for agreement details</div>
+ 
       <div class='button-container'>
         <button class='button -green center' onClick={startSpeechRecognition}>Start Speech</button>
         <button class='button -salmon center' onClick={stopSpeechRecognition}>Stop Speech</button>
         <button class='button -dark center' onClick={eraseTranscription}>Erase</button>
       </div>
-      
+
+      <div id='trascript-container'>
       {transcript === '' ? (
-        <div id="transcription">say something</div>
+        <div id="transcription"><div>Say Something</div></div>
       ) : (
         <div id="speechTranscriptContainer">
           <div id="transcription">
-            <h2>Transcribed Text:</h2>
+            <div>Transcribed Text</div>
             {/* <p>{transcript}</p> */}
           </div>
         </div>
@@ -221,14 +225,15 @@ function App() {
           <p key={index}>{timestamp}</p>
         ))}
       </div>
+      </div>
 
       {/* Step 3: display the summary */}
       <div id="summaryContainer">
-        <h2>Summary:</h2>
-        {summary !== undefined ? (
+        <div class='summary-title'>Summary</div>
+        {summary !== "" ? (
           <div id="summary">{summary}</div>
         ) : (
-          <p>No summary available.</p>
+          <div id="nosummary">No summary available.</div>
         )}
       </div>
 
