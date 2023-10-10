@@ -1,5 +1,6 @@
 import HelloSign from 'hellosign-embedded';
 import React, { useEffect, useState } from 'react';
+import './MainPage.css';
 
 function App() {
   const [transcript, setTranscript] = useState('');
@@ -182,8 +183,13 @@ function App() {
 
   return (
     <div className="App">
-
-      <h1>Audio-to-Agreement (change title later)</h1>
+    <div>
+      <h1 class="one">
+        Audio-to-Agreemen
+        <span>by hacakthon group</span>
+      </h1>
+    </div>
+      
 
       {/* Step 1: user uploads an audio file */}
       <form method="post" encType="multipart/form-data">
@@ -192,9 +198,12 @@ function App() {
       </form>
 
       {/* Step 2: display transcribed text */}
-      <button onClick={startSpeechRecognition}>Start Speech</button>
-      <button onClick={stopSpeechRecognition}>Stop Speech</button>
-      <button onClick={eraseTranscription}>Erase</button>
+      <div class='button-container'>
+        <button class='button -green center' onClick={startSpeechRecognition}>Start Speech</button>
+        <button class='button -salmon center' onClick={stopSpeechRecognition}>Stop Speech</button>
+        <button class='button -dark center' onClick={eraseTranscription}>Erase</button>
+      </div>
+      
       {transcript === '' ? (
         <div id="transcription">say something</div>
       ) : (
