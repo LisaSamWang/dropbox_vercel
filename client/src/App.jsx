@@ -186,7 +186,7 @@ function App() {
     <div class="one">
       <h1 >
         Audio-to-Agreemen
-        <span>by hacakthon group</span>
+        <span>by LegalEase</span>
       </h1>
     </div>
       
