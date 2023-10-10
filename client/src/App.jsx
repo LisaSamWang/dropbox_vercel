@@ -154,13 +154,13 @@ function App() {
 
   const renderGeneratedResponses = () => {
     if (generatedResponses.length === 0) {
-      return <p>No generated responses available.</p>;
+      return <p class="generatetext">No generated responses available.</p>;
     }
 
     return (
       <div id="generatedResponses">
         {generatedResponses.map((response, index) => (
-          <p key={index}>{response}</p>
+          <p class="generatetext" key={index}>{response}</p>
         ))}
       </div>
     );
@@ -239,28 +239,39 @@ function App() {
 
       {/* Step 4: generate agreements */}
       <div id="generatedResponses">
-        <h2>Generated Responses:</h2>
+        <div class='generate-title'>Generated Responses</div>
         {renderGeneratedResponses()}
       </div>
 
       {/* Step 5: user feedback and modification using audio file upload */}
-      <h2>Review and Modify Agreements:</h2>
-      <form action="/modify" method="POST" encType="multipart/form-data">
+      <div className='review-container'>
+      <div class='section-header'>Review and Modify Agreements</div>
+      <div class= 'instructions'></div>
+
+      <form class= "upload" action="/modify" method="POST" encType="multipart/form-data">
         <input type="file" name="audio_feedback" accept=".mp3, .wav, .ogg" />
         <input type="submit" value="Upload Audio Feedback" />
       </form>
-
+      </div>
       {/* Step 6: ai suggestions */}
-      <h2>AI Suggestions:</h2>
-      <p>AI-generated suggestions based on user feedback will display here</p>
+      <div class="review-container">
+      <div class='section-header'>AI Suggestion</div>
+      <div class= 'instructions'>AI-generated suggestions based on user feedback will display here</div>
+      </div>
+
 
       {/* Step 7: finalise & download agreements */}
-      <div>
-        <a href="/download">Download Customized Agreements</a> <button onClick={openSign}>Click Here To Sign</button>
+      <div class="review-container">
+        <div class="section-header">Download</div>
+        <div class="upload"> 
+        <a class="downloadlink" href="/download">Download Customized Agreements</a> 
+        <button class='button -salmon center' onClick={openSign}>Click Here To Sign</button>
+        </div>
+       
       </div>
 
       {/* Future features - will leave it here for now and check off later */}
-      <h2>Future Features:</h2>
+      <div class='section-header'>Future Features</div>
       <ul className="future-features">
         <li>Live translation</li>
         <li>Read agreements aloud</li>
